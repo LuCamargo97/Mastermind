@@ -1,5 +1,7 @@
 # 🧠 Mastermind Web
 
+![Mastermind Screenshot](img/screenshot.png)
+
 A web-based implementation of the classic code-breaking game **Mastermind**, built with Ruby and Sinatra. This project was developed to practice object-oriented programming, clean code principles, and MVC architecture concepts as part of The Odin Project curriculum.
 
 ## 🎮 Play the Game
@@ -36,6 +38,8 @@ After each guess, the computer provides feedback using small pins:
 ├── app.rb
 ├── Gemfile
 ├── Gemfile.lock
+├── img
+│   └── screenshot.png
 ├── lib
 │   ├── board.rb
 │   └── game.rb
