@@ -52,7 +52,9 @@ After each guess, the computer provides feedback using small pins:
 To get this project up and running on your local machine, follow these steps:
 
 **1. Clone the repository**
+
 **2. Install dependencies**
 Make sure you have ruby installed. Then, run: bundle install
+
 **3. Start the server**
 ruby app.rb
