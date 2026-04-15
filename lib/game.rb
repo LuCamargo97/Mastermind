@@ -1,5 +1,12 @@
 # frozen_string_literal: true
 
+# The Board class represents the visual and structural state of the game.
+# It is responsible for storing the history of guesses and their
+# corresponding feedback (black and white pins).
+#
+# This class ensures that the game data is organized for the
+# Sinatra views to render the board correctly.
+#
 class Game
   attr_reader :board, :secret_code, :current_attempt
 
