@@ -1,0 +1,222 @@
+<div class="container">
+  <form action="/reset" method="post">
+    <button type="submit" class="btn-reset-float">Reset Game</button>
+  </form>
+
+  <h1>Mastermind</h1>
+
+  <% if @game.won_last_attempt? %>
+    <div class="status-message victory">
+      <h2>🎉 Congratulations! You cracked the code!</h2>
+    </div>
+  <% elsif @game.lost? %>
+    <div class="status-message game-over">
+      <h2>💀 Game Over! The secret code was: <%= @game.secret_code.join(", ").upcase %></h2>
+    </div>
+  <% end %>
+
+  <div class="board">
+    <% @game.board.grid.each_with_index do |row, index| %>
+      <div class="attempt-row">
+        <span class="attempt-number">#<%= index + 1 %></span>
+        
+        <div class="slots">
+          <% row.each do |color| %>
+            <span class="peg" style="background-color: <%= color || '#333' %>; border: 2px solid <%= color ? '#fff' : '#222' %>;"></span>
+          <% end %>
+        </div>
+
+        <div class="hints-grid">
+          <% hints = @game.board.hints[index] %>
+          <% (hints[:black] || 0).times do %>
+            <span class="hint-peg black" title="Correct color and position"></span>
+          <% end %>
+          <% (hints[:white] || 0).times do %>
+            <span class="hint-peg white" title="Correct color, wrong position"></span>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <% unless @game.lost? || @game.won_last_attempt? %>
+    <div class="input-area">
+      <h3>Place your guess:</h3>
+      <form action="/guess" method="post" class="guess-form">
+        <div class="select-group">
+          <% 4.times do |i| %>
+            <select name="colors[]" data-index="<%= i %>" required>
+              <option value="" disabled selected>Color</option>
+              <% Board::AVAILABLE_COLORS.each do |color| %>
+                <option value="<%= color %>"><%= color.to_s.capitalize %></option>
+              <% end %>
+            </select>
+          <% end %>
+        </div>
+        <button type="submit" class="btn-submit">Submit Guess</button>
+      </form>
+    </div>
+  <% end %>
+</div>
+
+<script>
+  const selects = document.querySelectorAll('select[name="colors[]"]');
+  const currentAttemptIdx = <%= @game.board.current_attempt %>;
+  const rows = document.querySelectorAll('.attempt-row');
+  
+  if (rows[currentAttemptIdx]) {
+    const dots = rows[currentAttemptIdx].querySelectorAll('.peg');
+
+    selects.forEach((select, index) => {
+      select.addEventListener('change', (e) => {
+        dots[index].style.backgroundColor = e.target.value;
+        dots[index].style.borderColor = '#fff';
+      });
+    });
+  }
+</script>
+
+<style>
+  :root {
+    --bg-color: #232f3e;
+    --board-bg: #2c3e50;
+    --text-color: #ffffff;
+    --accent-color: #3498db;
+  }
+
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+    margin: 0;
+  }
+
+  .container {
+    text-align: center;
+    width: 100%;
+    max-width: 450px;
+    position: relative;
+    padding-top: 50px;
+  }
+
+  .btn-reset-float {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: rgba(255,255,255,0.1);
+    color: white;
+    border: 1px solid rgba(255,255,255,0.2);
+    padding: 6px 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85em;
+    transition: background 0.3s;
+  }
+
+  .btn-reset-float:hover {
+    background: #c0392b;
+    border-color: #c0392b;
+  }
+
+  .status-message {
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+  }
+  .victory { background-color: #27ae60; }
+  .game-over { background-color: #c0392b; }
+
+  .board {
+    background-color: var(--board-bg);
+    padding: 18px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  }
+
+  .attempt-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+
+  .attempt-number {
+    font-weight: bold;
+    width: 35px;
+    font-size: 0.8em;
+    color: rgba(255,255,255,0.4);
+  }
+
+  .slots {
+    display: flex;
+    gap: 10px;
+  }
+
+  .peg {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    transition: background-color 0.2s ease;
+  }
+
+  .hints-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 4px;
+    width: 32px;
+    min-height: 32px;
+    align-content: center;
+  }
+
+  .hint-peg {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 1px solid #111;
+    cursor: help; /* Indicates a tooltip is available */
+  }
+
+  .hint-peg.black { background-color: #000; box-shadow: 0 0 2px #000; }
+  .hint-peg.white { background-color: #fff; box-shadow: 0 0 2px #fff; }
+
+  .input-area {
+    margin-top: 25px;
+    padding: 20px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 10px;
+  }
+
+  .select-group {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 15px;
+    justify-content: center;
+  }
+
+  select {
+    padding: 8px;
+    border-radius: 6px;
+    border: none;
+    font-size: 0.9em;
+    width: 85px;
+    cursor: pointer;
+  }
+
+  .btn-submit {
+    background-color: var(--accent-color);
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    width: 100%;
+    transition: filter 0.2s;
+  }
+
+  .btn-submit:hover { filter: brightness(1.1); }
+</style>
